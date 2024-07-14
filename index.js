@@ -333,7 +333,6 @@ const cryptoPayApiKey = process.env.CRYPTOPAY_API_KEY;
 // Обработка команды /start
 bot.start((ctx) => {
   ctx.reply('Добро пожаловать! Используйте команду /pay для оплаты.');
-  // Отправка кнопки для открытия веб-приложения
   ctx.telegram.sendMessage(ctx.chat.id, 'Откройте веб-приложение 4V.ROBOT:', {
     reply_markup: {
       inline_keyboard: [
@@ -414,13 +413,30 @@ bot.command('use_service', async (ctx) => {
   }
 });
 
-// Запуск бота с long polling
+// Запуск бота
 bot.launch();
 console.log('Бот запущен с использованием long polling...');
 
-// Создание Express-сервера
+// Создание Express-сервера для обработки webhook уведомлений
 const app = express();
 app.use(bodyParser.json());
+
+app.post('/webhook', async (req, res) => {
+  const update = req.body;
+
+  if (update && update.ok) {
+    const invoice = update.result;
+
+    if (invoice.status === 'paid') {
+      const userId = JSON.parse(invoice.payload).userId;
+      await db.collection('users').doc(userId.toString()).set({
+        hasPaid: true
+      }, { merge: true });
+    }
+  }
+
+  res.sendStatus(200);
+});
 
 app.get('/', (req, res) => {
   res.send('Hello, this is your bot server!');
