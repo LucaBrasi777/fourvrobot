@@ -333,6 +333,7 @@ const cryptoPayApiKey = process.env.CRYPTOPAY_API_KEY;
 // Обработка команды /start
 bot.start((ctx) => {
   ctx.reply('Добро пожаловать! Используйте команду /pay для оплаты.');
+  // Отправка кнопки для открытия веб-приложения
   ctx.telegram.sendMessage(ctx.chat.id, 'Откройте веб-приложение 4V.ROBOT:', {
     reply_markup: {
       inline_keyboard: [
@@ -438,10 +439,7 @@ app.post('/webhook', async (req, res) => {
   res.sendStatus(200);
 });
 
-app.get('/', (req, res) => {
-  res.send('Hello, this is your bot server!');
-});
-
+// Настройка порта для прослушивания
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Сервер запущен на порту ${PORT}`);
