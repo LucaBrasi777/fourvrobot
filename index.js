@@ -326,12 +326,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { db } = require('./firebase');
 
-const { TELEGRAM_BOT_TOKEN, CRYPTOPAY_API_KEY, VERCEL_URL } = process.env;
+// Инициализация бота и переменных окружения
+const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
+const cryptoPayApiKey = process.env.CRYPTOPAY_API_KEY;
+const webhookUrl = `${process.env.VERCEL_URL}/webhook`;
 
-const bot = new Telegraf(TELEGRAM_BOT_TOKEN);
-
-bot.telegram.setWebhook(`${VERCEL_URL}/webhook`);
-
+// Обработка команды /start
 bot.start((ctx) => {
   ctx.reply('Добро пожаловать! Используйте команду /pay для оплаты.');
   ctx.telegram.sendMessage(ctx.chat.id, 'Откройте веб-приложение 4V.ROBOT:', {
@@ -343,6 +343,7 @@ bot.start((ctx) => {
   });
 });
 
+// Обработка команды /pay
 bot.command('pay', (ctx) => {
   ctx.reply('Выберите валюту для оплаты:', Markup.inlineKeyboard([
     Markup.button.callback('BTC', 'pay_btc'),
@@ -351,8 +352,10 @@ bot.command('pay', (ctx) => {
   ]));
 });
 
+// Функция для создания счета
 const createInvoice = async (ctx, asset) => {
-  let amount = 0.1;
+  let amount = 0.1; // Сумма эквивалентная 50 USDT для всех валют
+
   try {
     const response = await axios.post('https://pay.crypt.bot/api/createInvoice', {
       asset,
@@ -365,7 +368,7 @@ const createInvoice = async (ctx, asset) => {
     }, {
       headers: {
         'Content-Type': 'application/json',
-        'Crypto-Pay-API-Token': CRYPTOPAY_API_KEY
+        'Crypto-Pay-API-Token': cryptoPayApiKey
       }
     });
 
@@ -390,15 +393,18 @@ const createInvoice = async (ctx, asset) => {
   }
 };
 
+// Обработка нажатия кнопки оплаты
 bot.action('pay_btc', (ctx) => createInvoice(ctx, 'BTC'));
 bot.action('pay_usdt', (ctx) => createInvoice(ctx, 'USDT'));
 bot.action('pay_ton', (ctx) => createInvoice(ctx, 'TON'));
 
+// Проверка статуса оплаты
 const checkPaymentStatus = async (userId) => {
   const userDoc = await db.collection('users').doc(userId.toString()).get();
   return userDoc.exists && userDoc.data().hasPaid;
 };
 
+// Обработка команды использования сервиса
 bot.command('use_service', async (ctx) => {
   const hasPaid = await checkPaymentStatus(ctx.from.id);
   if (hasPaid) {
@@ -408,14 +414,26 @@ bot.command('use_service', async (ctx) => {
   }
 });
 
-bot.launch();
-console.log('Бот запущен...');
+// Запуск бота и установка webhook
+bot.launch().then(() => {
+  console.log('Бот запущен...');
+  bot.telegram.setWebhook(webhookUrl).then(() => {
+    console.log(`Webhook установлен: ${webhookUrl}`);
+  }).catch((error) => {
+    console.error(`Ошибка установки webhook: ${error}`);
+  });
+}).catch((error) => {
+  console.error(`Ошибка запуска бота: ${error}`);
+});
 
+// Создание Express-сервера для обработки webhook уведомлений
 const app = express();
 app.use(bodyParser.json());
 
 app.post('/webhook', async (req, res) => {
   const update = req.body;
+
+  console.log('Получен webhook:', update);
 
   if (update && update.ok) {
     const invoice = update.result;
@@ -430,12 +448,6 @@ app.post('/webhook', async (req, res) => {
 
   res.sendStatus(200);
 });
-
-app.get('/', (req, res) => {
-  res.send('Bot is running...');
-});
-
-app.use(bot.webhookCallback('/webhook'));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
