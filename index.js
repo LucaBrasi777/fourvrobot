@@ -329,11 +329,11 @@ const { db } = require('./firebase');
 // Инициализация бота и переменных окружения
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 const cryptoPayApiKey = process.env.CRYPTOPAY_API_KEY;
-const webhookUrl = `${process.env.VERCEL_URL}/webhook`;
 
 // Обработка команды /start
 bot.start((ctx) => {
   ctx.reply('Добро пожаловать! Используйте команду /pay для оплаты.');
+  // Отправка кнопки для открытия веб-приложения
   ctx.telegram.sendMessage(ctx.chat.id, 'Откройте веб-приложение 4V.ROBOT:', {
     reply_markup: {
       inline_keyboard: [
@@ -414,17 +414,11 @@ bot.command('use_service', async (ctx) => {
   }
 });
 
-// Запуск бота и установка webhook
-bot.launch().then(() => {
-  console.log('Бот запущен...');
-  bot.telegram.setWebhook(webhookUrl).then(() => {
-    console.log(`Webhook установлен: ${webhookUrl}`);
-  }).catch((error) => {
-    console.error(`Ошибка установки webhook: ${error}`);
-  });
-}).catch((error) => {
-  console.error(`Ошибка запуска бота: ${error}`);
-});
+// Запуск бота
+const webhookUrl = `${process.env.VERCEL_URL}/webhook`;
+bot.telegram.setWebhook(webhookUrl);
+bot.launch();
+console.log('Бот запущен...');
 
 // Создание Express-сервера для обработки webhook уведомлений
 const app = express();
@@ -432,8 +426,6 @@ app.use(bodyParser.json());
 
 app.post('/webhook', async (req, res) => {
   const update = req.body;
-
-  console.log('Получен webhook:', update);
 
   if (update && update.ok) {
     const invoice = update.result;
@@ -447,6 +439,10 @@ app.post('/webhook', async (req, res) => {
   }
 
   res.sendStatus(200);
+});
+
+app.get('/', (req, res) => {
+  res.send('Hello, this is your bot server!');
 });
 
 const PORT = process.env.PORT || 3000;
