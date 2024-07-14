@@ -219,23 +219,11 @@ bot.command('use_service', async (ctx) => {
   }
 });
 
-// Обработка команды для приглашения друзей
-bot.command('invite', (ctx) => {
-  const inviteLink = 'https://goodnewsexpress.com';
-  ctx.telegram.sendMessage(ctx.chat.id, 'Пригласите своих друзей на наш сайт:', {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: 'Перейти на сайт', url: inviteLink }]
-      ]
-    }
-  });
-});
-
 // Запуск бота
 bot.launch();
 console.log('Бот запущен с использованием long polling...');
 
-// Создание Express-сервера для обработки webhook уведомлений и приглашений
+// Создание Express-сервера для обработки webhook уведомлений
 const app = express();
 app.use(bodyParser.json());
 
@@ -254,24 +242,6 @@ app.post('/webhook', async (req, res) => {
   }
 
   res.sendStatus(200);
-});
-
-app.post('/create-invite', async (req, res) => {
-  const { userId } = req.body;
-
-  try {
-    await bot.telegram.sendMessage(userId, 'Пригласите своих друзей на наш сайт:', {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: 'Перейти на сайт', url: 'https://goodnewsexpress.com' }]
-        ]
-      }
-    });
-    res.sendStatus(200);
-  } catch (error) {
-    console.error('Error sending invite:', error);
-    res.sendStatus(500);
-  }
 });
 
 // Настройка порта для прослушивания
