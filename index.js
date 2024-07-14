@@ -329,6 +329,10 @@ const { db } = require('./firebase');
 // Инициализация бота и переменных окружения
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 const cryptoPayApiKey = process.env.CRYPTOPAY_API_KEY;
+const webhookUrl = `${process.env.VERCEL_URL}/webhook`;
+
+// Установка webhook'а
+bot.telegram.setWebhook(webhookUrl);
 
 // Обработка команды /start
 bot.start((ctx) => {
@@ -415,8 +419,6 @@ bot.command('use_service', async (ctx) => {
 });
 
 // Запуск бота
-const webhookUrl = `${process.env.VERCEL_URL}/webhook`;
-bot.telegram.setWebhook(webhookUrl);
 bot.launch();
 console.log('Бот запущен...');
 
@@ -424,25 +426,9 @@ console.log('Бот запущен...');
 const app = express();
 app.use(bodyParser.json());
 
-app.post('/webhook', async (req, res) => {
-  const update = req.body;
-
-  if (update && update.ok) {
-    const invoice = update.result;
-
-    if (invoice.status === 'paid') {
-      const userId = JSON.parse(invoice.payload).userId;
-      await db.collection('users').doc(userId.toString()).set({
-        hasPaid: true
-      }, { merge: true });
-    }
-  }
-
+app.post('/webhook', (req, res) => {
+  bot.handleUpdate(req.body);
   res.sendStatus(200);
-});
-
-app.get('/', (req, res) => {
-  res.send('Hello, this is your bot server!');
 });
 
 const PORT = process.env.PORT || 3000;
