@@ -275,7 +275,7 @@ bot.start((ctx) => {
   ctx.telegram.sendMessage(ctx.chat.id, 'Откройте веб-приложение 4V.ROBOT:', {
     reply_markup: {
       inline_keyboard: [
-        [{ text: '🌐 4V.ROBOT', web_app: { url: 'https://blockchainnewshubs.com/' } }]
+        [{ text: '🌐 4V.ROBOT', web_app: { url: 'https://forexgoodnews.com/' } }]
       ]
     }
   }).then(() => {
