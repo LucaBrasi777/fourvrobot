@@ -272,10 +272,10 @@ bot.start((ctx) => {
       console.error('Ошибка при отправке сообщения:', error);
     });
   // Отправка кнопки для открытия веб-приложения
-  ctx.telegram.sendMessage(ctx.chat.id, 'Откройте веб-приложение 4V.ROBOT:', {
+  ctx.telegram.sendMessage(ctx.chat.id, 'Play', {
     reply_markup: {
       inline_keyboard: [
-        [{ text: '🌐 4V.ROBOT', web_app: { url: 'https://forexgoodnews.com/' } }]
+        [{ text: '🌐 Play', web_app: { url: 'https://blockchainnewshubs.com/' } }]
       ]
     }
   }).then(() => {
