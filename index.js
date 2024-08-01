@@ -262,8 +262,17 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 const cryptoPayApiKey = process.env.CRYPTOPAY_API_KEY;
 
 // Обработка команды /start
-bot.start((ctx) => {
-  console.log('Команда /start вызвана');
+bot.start(async (ctx) => {
+  const referrerId = ctx.startPayload; // Получение реферального параметра из ссылки
+  const userId = ctx.from.id.toString();
+
+  // Сохранение реферального параметра в базе данных
+  if (referrerId) {
+    await db.collection('users').doc(userId).set({
+      referrerId: referrerId,
+    }, { merge: true });
+  }
+
   ctx.reply('Добро пожаловать! Используйте команду /pay для оплаты.')
     .then(() => {
       console.log('Сообщение отправлено успешно');
@@ -271,6 +280,7 @@ bot.start((ctx) => {
     .catch((error) => {
       console.error('Ошибка при отправке сообщения:', error);
     });
+
   // Отправка кнопки для открытия веб-приложения
   ctx.telegram.sendMessage(ctx.chat.id, 'Play', {
     reply_markup: {
