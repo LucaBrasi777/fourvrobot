@@ -12,12 +12,16 @@ const cryptoPayApiKey = process.env.CRYPTOPAY_API_KEY;
 
 // Обработка команды /start
 bot.start((ctx) => {
-  ctx.reply('Добро пожаловать! Используйте команду /pay для оплаты.');
+  //ctx.reply('Добро пожаловать! Используйте команду /pay для оплаты.');
   // Отправка кнопки для открытия веб-приложения
-  ctx.telegram.sendMessage(ctx.chat.id, 'Откройте веб-приложение 4V.ROBOT:', {
+  ctx.telegram.sendMessage(ctx.chat.id, 'Откройте веб-приложение:', {
     reply_markup: {
       inline_keyboard: [
-        [{ text: '🌐 4V.ROBOT', web_app: { url: 'https://forexgoodnews.com' } }]
+        [
+          { text: '🤖 4V.ROBOT', web_app: { url: 'https://forexgoodnews.com' } },
+          { text: '🪙 4V.COIN', web_app: { url: 'https://blockchainnewshubs.com' } },
+      
+      ]
       ]
     }
   });
