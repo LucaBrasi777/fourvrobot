@@ -1,5 +1,3 @@
-
-
 // require('dotenv').config();
 // const { Telegraf, Markup } = require('telegraf');
 // const axios = require('axios');
@@ -25,28 +23,18 @@
 //     console.log(`ID пригласившего: ${ownerId}`);
 
 //     // Отправляем POST-запрос на сервер для создания реферальной записи
-//     // Отправляем POST-запрос на сервер для создания реферальной записи
-// const url = `https://4v-news-api.azurewebsites.net/Games4V/Referral/Create?TelegramUserId=${ownerId}&TelegramChildUserId=${userId}`;
-// console.log(`Отправляем запрос на сервер: ${url}`);
+//     const url = `https://4v-news-api.azurewebsites.net/Games4V/Referral/Create?TelegramUserId=${ownerId}&TelegramChildUserId=${userId}`;
+//     console.log(`Отправляем запрос на сервер: ${url}`);
 
-// axios.post(url)
-//   .then((response) => {
-//     console.log('Успешный ответ сервера:', response.data);
-//     ctx.reply('Вы успешно зарегистрированы как реферал!');
-//   })
-//   .catch((error) => {
-//     console.error('Ошибка при создании реферальной записи:', error.response ? error.response.data : error.message);
-//     ctx.reply('Произошла ошибка при регистрации реферала.');
-//   })
-
-//   .then((response) => {
-//     ctx.reply('Вы успешно зарегистрированы как реферал!');
-//   })
-//   .catch((error) => {
-//     console.error('Ошибка при создании реферальной записи:', error.response ? error.response.data : error.message);
-//     ctx.reply('Произошла ошибка при регистрации реферала.');
-//   });
-
+//     axios.post(url)
+//       .then((response) => {
+//         console.log('Успешный ответ сервера:', response.data);
+//         ctx.reply('Вы успешно зарегистрированы как реферал!');
+//       })
+//       .catch((error) => {
+//         console.error('Ошибка при создании реферальной записи:', error.response ? error.response.data : error.message);
+//         ctx.reply('Произошла ошибка при регистрации реферала.');
+//       });
 //   } else {
 //     console.log('Параметр start отсутствует, генерируем реферальную ссылку для текущего пользователя.');
 //   }
@@ -60,9 +48,11 @@
 //     reply_markup: {
 //       inline_keyboard: [
 //         [
-//           { text: 'Скопировать ссылку', callback_data: 'copy_referral_link' },
-//           { text: '🤖 4V.ROBOT', web_app: { url: `https://test4vcoin.web.app/?start=owner_${userId}` } },
-//           { text: '🪙 4V.COIN', web_app: { url: `https://test4vcoin.web.app/?start=owner_${userId}` } }
+//           { text: 'Реферальная ссылка', callback_data: 'copy_referral_link' },
+//           { 
+//             text: '🤖 Открыть Web App', 
+//             web_app: { url: `https://test4vcoin.web.app/?start=owner_${userId}` } // Ссылка для открытия через Telegram Web App
+//           }
 //         ]
 //       ]
 //     }
@@ -72,8 +62,6 @@
 // });
 
 // // Обработка callback для копирования ссылки
-// // Обработка callback для копирования ссылки
-// // Обработка callback для копирования ссылки
 // bot.action('copy_referral_link', (ctx) => {
 //   const referralLink = `https://t.me/FOUR_V_DOT_ROBOT_bot?start=owner_${ctx.from.id}`;
   
@@ -82,8 +70,6 @@
 //   ctx.answerCbQuery('Ссылка отправлена в чат!');
 //   console.log(`Ссылка для копирования: ${referralLink}`);
 // });
-
-
 
 // // Обработка команды /pay
 // bot.command('pay', (ctx) => {
@@ -231,15 +217,22 @@ bot.start((ctx) => {
   const referralLink = `https://t.me/FOUR_V_DOT_ROBOT_bot?start=owner_${userId}`;
   console.log(`Сгенерирована реферальная ссылка: ${referralLink}`);
 
-  // Отправляем пользователю сообщение с кнопками для перехода на веб-приложение
-  ctx.telegram.sendMessage(ctx.chat.id, 'Откройте веб-приложение:', {
+  // Отправляем пользователю сообщение с кнопками для перехода на веб-приложение и приглашения друзей
+  ctx.telegram.sendMessage(ctx.chat.id, '<b>WELLCOME TO GAME</b>', {
+    parse_mode: 'HTML',
     reply_markup: {
       inline_keyboard: [
         [
-          { text: 'Скопировать ссылку', callback_data: 'copy_referral_link' },
+          { text: 'Реферальная ссылка', callback_data: 'copy_referral_link' },
+          // { 
+          //   text: '🤖 Открыть Web App', 
+          //   web_app: { url: `https://test4vcoin.web.app/?start=owner_${userId}` } // Ссылка для открытия через Telegram Web App
+          // }
+        ],
+        [
           { 
-            text: '🤖 Открыть Web App', 
-            web_app: { url: `https://test4vcoin.web.app/?start=owner_${userId}` } // Ссылка для открытия через Telegram Web App
+            text: 'Пригласить друзей', 
+            switch_inline_query: referralLink // Открыть список друзей с реферальной ссылкой
           }
         ]
       ]
